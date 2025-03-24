@@ -8,12 +8,16 @@ from app.models import MatchRequest, MatchResponse, MatchDetails, FileMatchReque
 from app.matcher import analyze_resume_job_match
 from app.database import store_match_result, get_match_history, get_match_by_id
 from app.file_utils import process_resume_file
+from app.storage import setup_db, save_match_to_db
 
 app = FastAPI(
     title="Job Matcher API",
     description="API for matching resumes with job descriptions using AI",
     version="1.0.0"
 )
+
+# Initialize the database
+setup_db()
 
 # Add CORS middleware to allow cross-origin requests
 app.add_middleware(
@@ -79,6 +83,18 @@ async def match_resume_job(data: MatchRequest):
             raw_output,
             parsed_output
         )
+        
+        # Also save to the new storage format
+        if structured_output:
+            save_match_to_db(
+                data.resume_text,
+                data.job_description,
+                structured_output.score,
+                structured_output.strengths,
+                structured_output.gaps,
+                structured_output.actions,
+                structured_output.summary
+            )
             
         return MatchResponse(
             raw_output=raw_output,
@@ -191,6 +207,18 @@ async def match_resume_file(
             raw_output,
             parsed_output
         )
+        
+        # Also save to the new storage format
+        if structured_output:
+            save_match_to_db(
+                resume_text,
+                job_description,
+                structured_output.score,
+                structured_output.strengths,
+                structured_output.gaps,
+                structured_output.actions,
+                structured_output.summary
+            )
             
         return MatchResponse(
             raw_output=raw_output,
