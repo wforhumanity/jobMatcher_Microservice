@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Markdown Export</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .input-section, .output-section {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3a5a8c;
+        }
+        pre {
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        h1 {
+            color: #4a6fa5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Markdown Export</h1>
+    <p>This page demonstrates the exportMatchToMarkdown utility function.</p>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Input</h2>
+            <h3>Job Description</h3>
+            <textarea id="job-description">Senior Frontend Developer
+Required Skills:
+- 5+ years of experience with React
+- TypeScript expertise
+- Experience with cloud deployments (AWS/Azure)
+- Team leadership experience
+- Strong communication skills</textarea>
+            
+            <h3>Match Result</h3>
+            <textarea id="match-result">{
+  "score": 81,
+  "strengths": ["Strong React experience", "Team leadership"],
+  "gaps": ["No TypeScript exposure", "Limited cloud deployment experience"],
+  "actions": [
+    "Take a TypeScript crash course",
+    "Deploy a personal project using AWS",
+    "Contribute to an open-source frontend repo"
+  ],
+  "summary": "You're a great fit for this role! With just a few upgrades, you'll be even more competitive. Keep going—you're almost there!"
+}</textarea>
+            
+            <button id="generate-btn">Generate Markdown</button>
+        </div>
+        
+        <div class="output-section">
+            <h2>Output</h2>
+            <pre id="markdown-output"></pre>
+        </div>
+    </div>
+    
+    <script src="exportMatchToMarkdown.js"></script>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            try {
+                const jobDescription = document.getElementById('job-description').value;
+                const matchResultText = document.getElementById('match-result').value;
+                const matchResult = JSON.parse(matchResultText);
+                
+                const markdown = exportMatchToMarkdown(jobDescription, matchResult);
+                document.getElementById('markdown-output').textContent = markdown;
+            } catch (error) {
+                document.getElementById('markdown-output').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

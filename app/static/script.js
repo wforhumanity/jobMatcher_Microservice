@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorBackBtn = document.getElementById('error-back-btn');
     const scoreValueEl = document.getElementById('score-value');
     const summaryTextEl = document.getElementById('summary-text');
-    const matchesListEl = document.getElementById('matches-list');
+    const strengthsListEl = document.getElementById('strengths-list');
     const gapsListEl = document.getElementById('gaps-list');
+    const actionsListEl = document.getElementById('actions-list');
     const rawOutputEl = document.getElementById('raw-output');
     const refreshHistoryBtn = document.getElementById('refresh-history');
     const historyListEl = document.getElementById('history-list');
     const historyLoadingEl = document.getElementById('history-loading');
     const historyEmptyEl = document.getElementById('history-empty');
     const historyErrorEl = document.getElementById('history-error');
+    
+    // Current job description and match result for export
+    let currentJobDescription = '';
+    let currentMatchResult = null;
 
     // Main tab switching
     tabBtns.forEach(btn => {
@@ -205,6 +210,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.parsed_output) {
             const { score, summary, strengths, gaps, actions } = data.parsed_output;
             
+            // Store current data for export
+            currentJobDescription = document.getElementById('text-input').classList.contains('active') 
+                ? document.getElementById('job-description').value 
+                : document.getElementById('file-job-description').value;
+            
+            currentMatchResult = {
+                score,
+                summary,
+                strengths,
+                gaps,
+                actions
+            };
+            
             // Update score
             scoreValueEl.textContent = score;
             
@@ -212,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
             summaryTextEl.textContent = summary;
             
             // Update strengths
-            const strengthsListEl = document.getElementById('strengths-list');
             strengthsListEl.innerHTML = '';
             
             if (strengths && strengths.length > 0) {
@@ -239,7 +256,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Update actions
-            const actionsListEl = document.getElementById('actions-list');
             actionsListEl.innerHTML = '';
             
             if (actions && actions.length > 0) {
@@ -251,13 +267,72 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 actionsListEl.innerHTML = '<li>No actions recommended</li>';
             }
+            
+            // Add export button if not already present
+            if (!document.getElementById('export-markdown-btn')) {
+                const exportBtn = document.createElement('button');
+                exportBtn.id = 'export-markdown-btn';
+                exportBtn.className = 'btn secondary-btn';
+                exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Export as Markdown';
+                exportBtn.style.marginTop = '20px';
+                
+                exportBtn.addEventListener('click', exportToMarkdown);
+                
+                // Add the button after the raw output container
+                document.querySelector('.raw-output-container').after(exportBtn);
+            }
         } else {
             // If parsed output is not available, show raw output only
             scoreValueEl.textContent = 'N/A';
             summaryTextEl.textContent = 'Structured data not available. Please see raw output.';
-            document.getElementById('strengths-list').innerHTML = '<li>Structured data not available</li>';
+            strengthsListEl.innerHTML = '<li>Structured data not available</li>';
             gapsListEl.innerHTML = '<li>Structured data not available</li>';
-            document.getElementById('actions-list').innerHTML = '<li>Structured data not available</li>';
+            actionsListEl.innerHTML = '<li>Structured data not available</li>';
+            
+            // Reset current data
+            currentJobDescription = '';
+            currentMatchResult = null;
+            
+            // Remove export button if present
+            const exportBtn = document.getElementById('export-markdown-btn');
+            if (exportBtn) {
+                exportBtn.remove();
+            }
+        }
+    }
+    
+    // Export match results to Markdown
+    function exportToMarkdown() {
+        if (!currentJobDescription || !currentMatchResult) {
+            alert('No match data available to export.');
+            return;
+        }
+        
+        try {
+            // Generate markdown
+            const markdown = exportMatchToMarkdown(currentJobDescription, currentMatchResult);
+            
+            // Create a blob with the markdown content
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            
+            // Create a download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'job-match-report.md';
+            
+            // Trigger the download
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
+        } catch (error) {
+            console.error('Error exporting to Markdown:', error);
+            alert('Error exporting to Markdown: ' + error.message);
         }
     }
 
@@ -361,6 +436,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('resume').value = item.resume_text;
         document.getElementById('job-description').value = item.job_description;
         
+        // Store the job description for export
+        currentJobDescription = item.job_description;
+        
         // Create a result object that matches the structure expected by displayResults
         let parsedOutput = null;
         
@@ -393,6 +471,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 gaps: gaps,
                 actions: ["Update your resume to address the identified gaps"]
             };
+        }
+        
+        // Store the match result for export
+        if (parsedOutput) {
+            currentMatchResult = parsedOutput;
         }
         
         const result = {
