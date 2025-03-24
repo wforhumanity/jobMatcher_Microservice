@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Matcher</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-briefcase"></i> Job Matcher</h1>
+            <p>Compare your resume with job descriptions using AI</p>
+        </header>
+
+        <main>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="new-match">New Match</button>
+                <button class="tab-btn" data-tab="history">Match History</button>
+            </div>
+
+            <div class="tab-content active" id="new-match">
+                <div class="tabs">
+                    <button class="input-tab-btn active" data-tab="text-input">Text Input</button>
+                    <button class="input-tab-btn" data-tab="file-input">File Upload</button>
+                </div>
+
+                <div class="input-tab-content active" id="text-input">
+                    <form id="match-form">
+                        <div class="form-group">
+                            <label for="resume">Resume</label>
+                            <textarea id="resume" name="resume" rows="10" placeholder="Paste your resume text here..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="job-description">Job Description</label>
+                            <textarea id="job-description" name="job-description" rows="10" placeholder="Paste the job description here..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn primary-btn">
+                            <i class="fas fa-sync-alt"></i> Analyze Match
+                        </button>
+                    </form>
+                </div>
+
+                <div class="input-tab-content" id="file-input">
+                    <form id="file-match-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="resume-file">Resume File</label>
+                            <div class="file-input-container">
+                                <input type="file" id="resume-file" name="resume_file" accept=".docx,.txt" required>
+                                <p class="file-help-text">Supported formats: .docx, .txt</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="file-job-description">Job Description</label>
+                            <textarea id="file-job-description" name="job_description" rows="10" placeholder="Paste the job description here..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn primary-btn">
+                            <i class="fas fa-sync-alt"></i> Analyze Match
+                        </button>
+                    </form>
+                </div>
+
+                <div id="loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Analyzing match... This may take a moment.</p>
+                </div>
+
+                <div id="results" class="hidden">
+                    <div class="results-header">
+                        <h2>Match Results</h2>
+                        <button id="back-btn" class="btn secondary-btn">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                    
+                    <div class="score-container">
+                        <div class="score-circle">
+                            <span id="score-value">0</span>
+                        </div>
+                        <div class="score-label">Compatibility Score</div>
+                    </div>
+
+                    <div class="summary-container">
+                        <h3>Summary</h3>
+                        <p id="summary-text"></p>
+                    </div>
+
+                    <div class="highlights-container">
+                        <div class="matches">
+                            <h3><i class="fas fa-check-circle"></i> Strengths</h3>
+                            <ul id="strengths-list"></ul>
+                        </div>
+                        <div class="gaps">
+                            <h3><i class="fas fa-exclamation-circle"></i> Areas for Improvement</h3>
+                            <ul id="gaps-list"></ul>
+                        </div>
+                    </div>
+
+                    <div class="actions-container">
+                        <h3><i class="fas fa-tasks"></i> Recommended Actions</h3>
+                        <ul id="actions-list"></ul>
+                    </div>
+
+                    <div class="raw-output-container">
+                        <details>
+                            <summary>Raw Output</summary>
+                            <pre id="raw-output"></pre>
+                        </details>
+                    </div>
+                </div>
+
+                <div id="error" class="hidden">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Error</h3>
+                    <p id="error-message"></p>
+                    <button id="error-back-btn" class="btn secondary-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="history">
+                <div class="history-header">
+                    <h2>Match History</h2>
+                    <button id="refresh-history" class="btn secondary-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="history-loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Loading history...</p>
+                </div>
+                <div id="history-list"></div>
+                <div id="history-empty" class="hidden">
+                    <p>No match history found.</p>
+                </div>
+                <div id="history-error" class="hidden">
+                    <p>Error loading match history.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Job Matcher | Powered by OpenAI</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
