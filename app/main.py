@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from typing import List, Dict, Any, Optional
-from app.models import MatchRequest, MatchResponse, MatchDetails, FileMatchRequest
-from app.matcher import analyze_resume_job_match
+from app.models import MatchRequest, MatchResponse, MatchDetails, FileMatchRequest, ChatRequest
+from app.matcher import analyze_resume_job_match, chat_with_assistant
 from app.database import store_match_result, get_match_history, get_match_by_id
 from app.file_utils import process_resume_file
 from app.storage import setup_db, save_match_to_db
@@ -238,3 +238,23 @@ async def api_info():
         "version": "1.0.0",
         "description": "API for matching resumes with job descriptions using AI"
     }
+
+@app.post("/chat")
+async def chat(data: ChatRequest):
+    """
+    Chat with an AI assistant about the resume, job description, and match results.
+    
+    The assistant can answer questions and provide personalized advice based on the match analysis.
+    """
+    try:
+        response = await chat_with_assistant(
+            data.resume_text,
+            data.job_description,
+            data.match_result,
+            data.message
+        )
+        
+        return {"response": response}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
